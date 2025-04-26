@@ -1,32 +1,26 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const tileSize = 25; // Size of each block in the maze
+const tileSize = 20; // Smaller tiles
 
-// Maze structure: 1 = wall, 0 = path
+// Smaller example maze: 1 = wall, 0 = path
 const maze = [
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,0,1],
-  [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1],
-  [1,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,1],
-  [1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1],
-  [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1],
-  [1,1,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,1],
-  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
-  [1,0,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,1],
-  [1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1,0,1],
-  [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,0,1],
-  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
-  [1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1],
-  [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1],
-  [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1],
-  [1,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1],
-  [1,0,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1],
-  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  [1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+  [1,0,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+  [1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+  [1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1],
+  [1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+  [1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+  [1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+  [1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1],
+  [1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+  [1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+  [1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ];
 
-// Player position
+// Player starting position
 let player = {
   x: 1,
   y: 1
@@ -37,11 +31,10 @@ function drawMaze() {
     for (let col = 0; col < maze[row].length; col++) {
       if (maze[row][col] === 1) {
         ctx.fillStyle = "white";
-        ctx.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
       } else {
         ctx.fillStyle = "black";
-        ctx.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
       }
+      ctx.fillRect(col * tileSize, row * tileSize, tileSize, tileSize);
     }
   }
 }
@@ -49,7 +42,7 @@ function drawMaze() {
 function drawPlayer() {
   ctx.fillStyle = "white";
   ctx.beginPath();
-  ctx.arc(player.x * tileSize + tileSize/2, player.y * tileSize + tileSize/2, tileSize/3, 0, Math.PI * 2);
+  ctx.arc(player.x * tileSize + tileSize / 2, player.y * tileSize + tileSize / 2, tileSize / 3, 0, Math.PI * 2);
   ctx.fill();
 }
 
@@ -74,5 +67,5 @@ window.addEventListener("keydown", (e) => {
   gameLoop();
 });
 
-// Initial draw
+// First draw
 gameLoop();
