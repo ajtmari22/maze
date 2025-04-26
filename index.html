@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Maze Game</title>
+  <title>Maze Game with Walls</title>
   <style>
     body {
       background: black;
@@ -16,54 +16,72 @@
       position: relative;
       width: 500px;
       height: 500px;
-      overflow: hidden;
     }
-    .maze {
+    canvas, .player {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    canvas {
       width: 100%;
       height: 100%;
-      display: block;
+      z-index: 1;
     }
     .player {
-      position: absolute;
-      top: 10px;
-      left: 10px;
       width: 20px;
       height: 20px;
       background-color: limegreen;
       border-radius: 50%;
       z-index: 2;
+      transform: translate(10px, 10px); /* Starting position */
     }
   </style>
 </head>
 <body>
 
 <div class="maze-container">
-  <img src="maze.png" alt="Maze" class="maze">
+  <canvas id="mazeCanvas" width="500" height="500"></canvas>
   <div class="player" id="player"></div>
 </div>
 
 <script>
+  const canvas = document.getElementById('mazeCanvas');
+  const ctx = canvas.getContext('2d');
   const player = document.getElementById('player');
-  const container = document.querySelector('.maze-container');
-  const step = 5; // How many pixels to move per key press
+  const step = 5; // Movement per key press
+
+  const mazeImage = new Image();
+  mazeImage.src = "Adobe Express - file (1).png";
+
+  mazeImage.onload = () => {
+    ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
+  };
+
+  let playerX = 10;
+  let playerY = 10;
 
   document.addEventListener('keydown', (e) => {
-    let top = parseInt(window.getComputedStyle(player).top);
-    let left = parseInt(window.getComputedStyle(player).left);
+    let nextX = playerX;
+    let nextY = playerY;
 
-    switch(e.key) {
-      case 'ArrowUp':
-        if (top > 0) player.style.top = (top - step) + 'px';
-        break;
-      case 'ArrowDown':
-        if (top + player.offsetHeight < container.offsetHeight) player.style.top = (top + step) + 'px';
-        break;
-      case 'ArrowLeft':
-        if (left > 0) player.style.left = (left - step) + 'px';
-        break;
-      case 'ArrowRight':
-        if (left + player.offsetWidth < container.offsetWidth) player.style.left = (left + step) + 'px';
-        break;
+    if (e.key === 'ArrowUp') nextY -= step;
+    if (e.key === 'ArrowDown') nextY += step;
+    if (e.key === 'ArrowLeft') nextX -= step;
+    if (e.key === 'ArrowRight') nextX += step;
+
+    // Get color at the next position
+    const pixel = ctx.getImageData(nextX + 10, nextY + 10, 1, 1).data;
+    const r = pixel[0];
+    const g = pixel[1];
+    const b = pixel[2];
+
+    // Assume black paths (0,0,0) are walkable
+    const isPath = r < 50 && g < 50 && b < 50;
+
+    if (isPath) {
+      playerX = nextX;
+      playerY = nextY;
+      player.style.transform = `translate(${playerX}px, ${playerY}px)`;
     }
   });
 </script>
