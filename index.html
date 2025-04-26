@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Maze Game with Walls</title>
+  <title>Maze Game with Animated Character</title>
   <style>
     body {
       background: black;
@@ -28,12 +28,12 @@
       z-index: 1;
     }
     .player {
-      width: 20px;
-      height: 20px;
-      background-color: limegreen;
-      border-radius: 50%;
+      width: 48px; /* size of one frame */
+      height: 48px;
+      background: url('sprite.png') no-repeat;
+      background-size: 192px 192px; /* 4 columns x 4 rows of frames */
       z-index: 2;
-      transform: translate(10px, 10px); /* Starting position */
+      transform: translate(10px, 10px);
     }
   </style>
 </head>
@@ -48,10 +48,10 @@
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
   const player = document.getElementById('player');
-  const step = 5; // Movement per key press
+  const step = 5;
 
   const mazeImage = new Image();
-  mazeImage.src = "Adobe Express - file (1).png";
+  mazeImage.src = "maze.png"; // Your maze image
 
   mazeImage.onload = () => {
     ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
@@ -60,28 +60,60 @@
   let playerX = 10;
   let playerY = 10;
 
+  const frameWidth = 48;
+  const frameHeight = 48;
+  let currentFrame = 0;
+  const totalFrames = 4; // 4 frames per row
+  let direction = 0; // 0: down, 1: left, 2: right, 3: up
+
+  function updatePlayerSprite() {
+    const backgroundX = -(currentFrame * frameWidth);
+    const backgroundY = -(direction * frameHeight);
+    player.style.backgroundPosition = `${backgroundX}px ${backgroundY}px`;
+  }
+
   document.addEventListener('keydown', (e) => {
     let nextX = playerX;
     let nextY = playerY;
+    let moved = false;
 
-    if (e.key === 'ArrowUp') nextY -= step;
-    if (e.key === 'ArrowDown') nextY += step;
-    if (e.key === 'ArrowLeft') nextX -= step;
-    if (e.key === 'ArrowRight') nextX += step;
+    if (e.key === 'ArrowUp') {
+      nextY -= step;
+      direction = 3;
+      moved = true;
+    }
+    if (e.key === 'ArrowDown') {
+      nextY += step;
+      direction = 0;
+      moved = true;
+    }
+    if (e.key === 'ArrowLeft') {
+      nextX -= step;
+      direction = 1;
+      moved = true;
+    }
+    if (e.key === 'ArrowRight') {
+      nextX += step;
+      direction = 2;
+      moved = true;
+    }
 
-    // Get color at the next position
-    const pixel = ctx.getImageData(nextX + 10, nextY + 10, 1, 1).data;
-    const r = pixel[0];
-    const g = pixel[1];
-    const b = pixel[2];
+    if (moved) {
+      const pixel = ctx.getImageData(nextX + frameWidth/2, nextY + frameHeight/2, 1, 1).data;
+      const r = pixel[0];
+      const g = pixel[1];
+      const b = pixel[2];
 
-    // Assume black paths (0,0,0) are walkable
-    const isPath = r < 50 && g < 50 && b < 50;
+      const isPath = r < 50 && g < 50 && b < 50;
 
-    if (isPath) {
-      playerX = nextX;
-      playerY = nextY;
-      player.style.transform = `translate(${playerX}px, ${playerY}px)`;
+      if (isPath) {
+        playerX = nextX;
+        playerY = nextY;
+        player.style.transform = `translate(${playerX}px, ${playerY}px)`;
+
+        currentFrame = (currentFrame + 1) % totalFrames;
+        updatePlayerSprite();
+      }
     }
   });
 </script>
