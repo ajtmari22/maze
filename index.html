@@ -1,122 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Maze</title>
-<style>
+  <meta charset="UTF-8">
+  <title>Maze Game</title>
+  <style>
     body {
-        background: black;
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
-    canvas {
-        background: black;
-        display: block;
+    .maze-container {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      overflow: hidden;
     }
-</style>
+    .maze {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .player {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 20px;
+      height: 20px;
+      background-color: limegreen;
+      border-radius: 50%;
+      z-index: 2;
+    }
+  </style>
 </head>
 <body>
-<canvas id="gameCanvas" width="320" height="320"></canvas>
+
+<div class="maze-container">
+  <img src="Adobe Express - file (1).png" alt="Maze" class="maze">
+  <div class="player" id="player"></div>
+</div>
 
 <script>
-    const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+  const player = document.getElementById('player');
+  const container = document.querySelector('.maze-container');
+  const step = 5; // How many pixels to move per key press
 
-const tileSize = 20;  // Each tile is 20px
+  document.addEventListener('keydown', (e) => {
+    let top = parseInt(window.getComputedStyle(player).top);
+    let left = parseInt(window.getComputedStyle(player).left);
 
-// Maze definition: 1 = wall, 0 = path
-const maze = [
-  [1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1],
-  [1,0,0,1,0,1,0,0,1,0,0,0,1,0,0,1],
-  [1,0,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
-  [1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1],
-  [1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1],
-  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
-  [1,0,1,1,1,0,1,1,1,1,1,0,1,1,0,1],
-  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
-  [1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1],
-  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
-  [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1],
-  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
-  [1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1],
-  [1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1],
-  [1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,1],
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-];
-
-// Player
-let player = { x: 4, y: 0 }; // Start where path (0) is
-
-// Draw maze using lines
-function drawMaze() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 2;
-
-    for (let y = 0; y < maze.length; y++) {
-        for (let x = 0; x < maze[y].length; x++) {
-            if (maze[y][x] === 1) {
-                let px = x * tileSize;
-                let py = y * tileSize;
-
-                ctx.beginPath();
-                // Draw walls
-                if (y === 0 || maze[y-1][x] === 0) {
-                    ctx.moveTo(px, py);
-                    ctx.lineTo(px + tileSize, py);
-                }
-                if (x === 0 || maze[y][x-1] === 0) {
-                    ctx.moveTo(px, py);
-                    ctx.lineTo(px, py + tileSize);
-                }
-                if (x === maze[y].length-1 || maze[y][x+1] === 0) {
-                    ctx.moveTo(px + tileSize, py);
-                    ctx.lineTo(px + tileSize, py + tileSize);
-                }
-                if (y === maze.length-1 || maze[y+1][x] === 0) {
-                    ctx.moveTo(px, py + tileSize);
-                    ctx.lineTo(px + tileSize, py + tileSize);
-                }
-                ctx.stroke();
-            }
-        }
+    switch(e.key) {
+      case 'ArrowUp':
+        if (top > 0) player.style.top = (top - step) + 'px';
+        break;
+      case 'ArrowDown':
+        if (top + player.offsetHeight < container.offsetHeight) player.style.top = (top + step) + 'px';
+        break;
+      case 'ArrowLeft':
+        if (left > 0) player.style.left = (left - step) + 'px';
+        break;
+      case 'ArrowRight':
+        if (left + player.offsetWidth < container.offsetWidth) player.style.left = (left + step) + 'px';
+        break;
     }
-}
+  });
+</script>
 
-// Draw player
-function drawPlayer() {
-    ctx.fillStyle = "cyan";
-    ctx.beginPath();
-    ctx.arc(
-        player.x * tileSize + tileSize/2,
-        player.y * tileSize + tileSize/2,
-        tileSize/4,
-        0,
-        Math.PI * 2
-    );
-    ctx.fill();
-}
-
-// Movement
-window.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowUp" && player.y > 0 && maze[player.y-1][player.x] === 0) player.y--;
-    if (e.key === "ArrowDown" && player.y < maze.length-1 && maze[player.y+1][player.x] === 0) player.y++;
-    if (e.key === "ArrowLeft" && player.x > 0 && maze[player.y][player.x-1] === 0) player.x--;
-    if (e.key === "ArrowRight" && player.x < maze[0].length-1 && maze[player.y][player.x+1] === 0) player.x++;
-    gameLoop();
-});
-
-// Game Loop
-function gameLoop() {
-    drawMaze();
-    drawPlayer();
-}
-
-gameLoop();
-
-    </script>
 </body>
 </html>
