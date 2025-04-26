@@ -1,9 +1,12 @@
+<canvas id="gameCanvas" width="320" height="320" style="background: black;"></canvas>
+
+<script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const tileSize = 20;
 
-// Your actual maze structure based on the image
+// Your maze structure
 const maze = [
   [1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1],
   [1,0,0,1,0,1,0,0,1,0,0,0,1,0,0,1],
@@ -26,31 +29,54 @@ const maze = [
 // Player
 let player = { x: 0, y: 0 };
 
-// Draw the maze
+// Draw Maze using lines
 function drawMaze() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
+
     for (let y = 0; y < maze.length; y++) {
         for (let x = 0; x < maze[y].length; x++) {
             if (maze[y][x] === 1) {
-                ctx.fillStyle = "white"; // Walls
-                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-                ctx.fillStyle = "gray"; // 3D shading
-                ctx.fillRect(x * tileSize + 2, y * tileSize + 2, tileSize - 4, tileSize - 4);
-            } else {
-                ctx.fillStyle = "black"; // Paths
-                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                // Draw lines around the wall
+                let px = x * tileSize;
+                let py = y * tileSize;
+
+                ctx.beginPath();
+                // Top wall
+                if (y === 0 || maze[y - 1][x] === 0) {
+                    ctx.moveTo(px, py);
+                    ctx.lineTo(px + tileSize, py);
+                }
+                // Left wall
+                if (x === 0 || maze[y][x - 1] === 0) {
+                    ctx.moveTo(px, py);
+                    ctx.lineTo(px, py + tileSize);
+                }
+                // Right wall
+                if (x === maze[y].length - 1 || maze[y][x + 1] === 0) {
+                    ctx.moveTo(px + tileSize, py);
+                    ctx.lineTo(px + tileSize, py + tileSize);
+                }
+                // Bottom wall
+                if (y === maze.length - 1 || maze[y + 1][x] === 0) {
+                    ctx.moveTo(px, py + tileSize);
+                    ctx.lineTo(px + tileSize, py + tileSize);
+                }
+                ctx.stroke();
             }
         }
     }
 }
 
-// Draw player
+// Draw the player
 function drawPlayer() {
     ctx.fillStyle = "white";
     ctx.beginPath();
     ctx.arc(
         player.x * tileSize + tileSize / 2,
         player.y * tileSize + tileSize / 2,
-        tileSize / 3,
+        tileSize / 4,
         0,
         Math.PI * 2
     );
@@ -82,3 +108,4 @@ function gameLoop() {
 
 // Start
 gameLoop();
+</script>
