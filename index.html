@@ -45,10 +45,11 @@ const maze = [
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ];
 
-// Player
+// Player starts at (4, 0)
 let player = { x: 4, y: 0 };
+// End is at (15, 13)
+let end = { x: 15, y: 13 };
 
-// Draw maze with LINES instead of blocks
 function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = "white";
@@ -61,22 +62,18 @@ function drawMaze() {
                 const py = y * tileSize;
 
                 ctx.beginPath();
-                // Top wall
                 if (y == 0 || maze[y-1][x] === 0) {
                     ctx.moveTo(px, py);
                     ctx.lineTo(px + tileSize, py);
                 }
-                // Left wall
                 if (x == 0 || maze[y][x-1] === 0) {
                     ctx.moveTo(px, py);
                     ctx.lineTo(px, py + tileSize);
                 }
-                // Bottom wall
                 if (y == maze.length-1 || maze[y+1][x] === 0) {
                     ctx.moveTo(px, py + tileSize);
                     ctx.lineTo(px + tileSize, py + tileSize);
                 }
-                // Right wall
                 if (x == maze[y].length-1 || maze[y][x+1] === 0) {
                     ctx.moveTo(px + tileSize, py);
                     ctx.lineTo(px + tileSize, py + tileSize);
@@ -85,11 +82,13 @@ function drawMaze() {
             }
         }
     }
-}
 
-// Draw player
-function drawPlayer() {
-    ctx.fillStyle = "cyan";
+    // Draw end goal (red square)
+    ctx.fillStyle = "red";
+    ctx.fillRect(end.x * tileSize + 5, end.y * tileSize + 5, tileSize - 10, tileSize - 10);
+
+    // Draw start point (green circle)
+    ctx.fillStyle = "lime";
     ctx.beginPath();
     ctx.arc(
         player.x * tileSize + tileSize/2,
@@ -101,23 +100,24 @@ function drawPlayer() {
     ctx.fill();
 }
 
-// Movement
-window.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowUp" && player.y > 0 && maze[player.y-1][player.x] === 0) player.y--;
-    if (e.key === "ArrowDown" && player.y < maze.length-1 && maze[player.y+1][player.x] === 0) player.y++;
-    if (e.key === "ArrowLeft" && player.x > 0 && maze[player.y][player.x-1] === 0) player.x--;
-    if (e.key === "ArrowRight" && player.x < maze[0].length-1 && maze[player.y][player.x+1] === 0) player.x++;
-    gameLoop();
-});
-
-// Game Loop
-function gameLoop() {
-    drawMaze();
-    drawPlayer();
+function drawPlayer() {
+    ctx.fillStyle = "cyan";
+    ctx.beginPath();
+    ctx.arc(
+        player.x * tileSize + tileSize / 2,
+        player.y * tileSize + tileSize / 2,
+        tileSize / 4,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
 }
 
-gameLoop();
-</script>
+function checkWin() {
+    if (player.x === end.x && player.y === end.y) {
+        setTimeout(() => alert("🎉 You reached the end!"), 100);
+    }
+}
 
-</body>
-</html>
+window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowUp" && player.y > 0 &&
