@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Maze Game with Directional Animation</title>
+  <title>Maze Game with CSS Animations</title>
   <style>
     body {
       background: black;
@@ -28,13 +28,46 @@
       z-index: 1;
     }
     .player {
-      width: 48px; /* Size of one frame */
+      width: 48px;
       height: 48px;
-      background: url('sprite.png') no-repeat;
-      background-size: 192px 192px; /* Full sprite sheet size */
+      background: url('sprite.png') no-repeat 0 0;
+      background-size: 192px 192px;
       z-index: 2;
       transform: translate(10px, 10px);
     }
+
+    /* Animations */
+    .walk-down {
+      animation: walkDown 0.6s steps(4) infinite;
+    }
+    .walk-left {
+      animation: walkLeft 0.6s steps(4) infinite;
+    }
+    .walk-right {
+      animation: walkRight 0.6s steps(4) infinite;
+    }
+    .walk-up {
+      animation: walkUp 0.6s steps(4) infinite;
+    }
+
+    /* Keyframes */
+    @keyframes walkDown {
+      from { background-position: 0px 0px; }
+      to { background-position: -192px 0px; }
+    }
+    @keyframes walkLeft {
+      from { background-position: 0px -48px; }
+      to { background-position: -192px -48px; }
+    }
+    @keyframes walkRight {
+      from { background-position: 0px -96px; }
+      to { background-position: -192px -96px; }
+    }
+    @keyframes walkUp {
+      from { background-position: 0px -144px; }
+      to { background-position: -192px -144px; }
+    }
+
   </style>
 </head>
 <body>
@@ -48,10 +81,10 @@
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
   const player = document.getElementById('player');
-  const step = 5;
+  const step = 2.5;
 
   const mazeImage = new Image();
-  mazeImage.src = "maze.png"; // Your maze image
+  mazeImage.src = "maze.png";
 
   mazeImage.onload = () => {
     ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
@@ -60,64 +93,76 @@
   let playerX = 10;
   let playerY = 10;
 
-  const frameWidth = 48;
-  const frameHeight = 48;
-  let currentFrame = 0;
-  const totalFrames = 4; // 4 frames per direction
-
-  let direction = 0; // 0: down, 1: left, 2: right, 3: up
-
-  function updatePlayerSprite() {
-    const backgroundX = -(currentFrame * frameWidth);
-    const backgroundY = -(direction * frameHeight);
-    player.style.backgroundPosition = `${backgroundX}px ${backgroundY}px`;
-  }
+  let keysPressed = {};
 
   document.addEventListener('keydown', (e) => {
-    let nextX = playerX;
-    let nextY = playerY;
+    keysPressed[e.key] = true;
+  });
+
+  document.addEventListener('keyup', (e) => {
+    delete keysPressed[e.key];
+  });
+
+  function movePlayer() {
     let moved = false;
 
-    if (e.key === 'ArrowUp') {
-      nextY -= step;
-      direction = 3; // up
+    if (keysPressed['ArrowUp']) {
+      playerY -= step;
+      setAnimation('up');
       moved = true;
-    }
-    if (e.key === 'ArrowDown') {
-      nextY += step;
-      direction = 0; // down
+    } else if (keysPressed['ArrowDown']) {
+      playerY += step;
+      setAnimation('down');
       moved = true;
-    }
-    if (e.key === 'ArrowLeft') {
-      nextX -= step;
-      direction = 1; // left
+    } else if (keysPressed['ArrowLeft']) {
+      playerX -= step;
+      setAnimation('left');
       moved = true;
-    }
-    if (e.key === 'ArrowRight') {
-      nextX += step;
-      direction = 2; // right
+    } else if (keysPressed['ArrowRight']) {
+      playerX += step;
+      setAnimation('right');
       moved = true;
+    } else {
+      clearAnimation();
     }
 
-    if (moved) {
-      const pixel = ctx.getImageData(nextX + frameWidth / 2, nextY + frameHeight / 2, 1, 1).data;
-      const r = pixel[0];
-      const g = pixel[1];
-      const b = pixel[2];
+    // Wall collision detection
+    const pixel = ctx.getImageData(playerX + 24, playerY + 24, 1, 1).data;
+    const r = pixel[0];
+    const g = pixel[1];
+    const b = pixel[2];
 
-      const isPath = r < 50 && g < 50 && b < 50;
+    const isPath = r < 50 && g < 50 && b < 50;
 
-      if (isPath) {
-        playerX = nextX;
-        playerY = nextY;
-        player.style.transform = `translate(${playerX}px, ${playerY}px)`;
-
-        // Animate through frames only for the current direction
-        currentFrame = (currentFrame + 1) % totalFrames;
-        updatePlayerSprite();
-      }
+    if (isPath) {
+      player.style.transform = `translate(${playerX}px, ${playerY}px)`;
+    } else {
+      // Undo movement if hit wall
+      if (keysPressed['ArrowUp']) playerY += step;
+      if (keysPressed['ArrowDown']) playerY -= step;
+      if (keysPressed['ArrowLeft']) playerX += step;
+      if (keysPressed['ArrowRight']) playerX -= step;
     }
-  });
+  }
+
+  function setAnimation(direction) {
+    player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
+    if (direction === 'up') player.classList.add('walk-up');
+    if (direction === 'down') player.classList.add('walk-down');
+    if (direction === 'left') player.classList.add('walk-left');
+    if (direction === 'right') player.classList.add('walk-right');
+  }
+
+  function clearAnimation() {
+    player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
+  }
+
+  function gameLoop() {
+    movePlayer();
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
 </script>
 
 </body>
