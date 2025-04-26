@@ -1,63 +1,84 @@
-const canvas = document.getElementById('mazeCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-// Set canvas size according to your maze
-canvas.width = 400;
-canvas.height = 400;
+const tileSize = 20;
 
-// Wall style
-ctx.strokeStyle = 'white';
-ctx.lineWidth = 2;
+// Your actual maze structure based on the image
+const maze = [
+  [1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1],
+  [1,0,0,1,0,1,0,0,1,0,0,0,1,0,0,1],
+  [1,0,1,1,0,1,1,0,1,1,1,0,1,1,0,1],
+  [1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1],
+  [1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1],
+  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+  [1,0,1,1,1,0,1,1,1,1,1,0,1,1,0,1],
+  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+  [1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1],
+  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+  [1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1],
+  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+  [1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1],
+  [1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1],
+  [1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
 
-// Maze dimensions
-const cellSize = 25; // adjust based on your original maze size
+// Player
+let player = { x: 0, y: 0 };
 
+// Draw the maze
 function drawMaze() {
-    // Top horizontal lines
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(canvas.width, 0);
-    ctx.stroke();
-
-    // Bottom horizontal line
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height);
-    ctx.lineTo(canvas.width, canvas.height);
-    ctx.stroke();
-
-    // Left vertical line
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(0, canvas.height);
-    ctx.stroke();
-
-    // Right vertical line
-    ctx.beginPath();
-    ctx.moveTo(canvas.width, 0);
-    ctx.lineTo(canvas.width, canvas.height);
-    ctx.stroke();
-
-    // Now draw the internal walls based on your maze layout:
-    // Example: (you can add more based on your maze)
-    drawHorizontalLine(1, 1, 3); // draws from cell (1,1) to (3,1)
-    drawVerticalLine(3, 1, 4);   // draws from cell (3,1) down to (3,4)
-    // keep adding similar drawHorizontalLine / drawVerticalLine
+    for (let y = 0; y < maze.length; y++) {
+        for (let x = 0; x < maze[y].length; x++) {
+            if (maze[y][x] === 1) {
+                ctx.fillStyle = "white"; // Walls
+                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                ctx.fillStyle = "gray"; // 3D shading
+                ctx.fillRect(x * tileSize + 2, y * tileSize + 2, tileSize - 4, tileSize - 4);
+            } else {
+                ctx.fillStyle = "black"; // Paths
+                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+            }
+        }
+    }
 }
 
-// Helper to draw horizontal wall
-function drawHorizontalLine(xStart, yStart, xEnd) {
+// Draw player
+function drawPlayer() {
+    ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.moveTo(xStart * cellSize, yStart * cellSize);
-    ctx.lineTo(xEnd * cellSize, yStart * cellSize);
-    ctx.stroke();
+    ctx.arc(
+        player.x * tileSize + tileSize / 2,
+        player.y * tileSize + tileSize / 2,
+        tileSize / 3,
+        0,
+        Math.PI * 2
+    );
+    ctx.fill();
 }
 
-// Helper to draw vertical wall
-function drawVerticalLine(xStart, yStart, yEnd) {
-    ctx.beginPath();
-    ctx.moveTo(xStart * cellSize, yStart * cellSize);
-    ctx.lineTo(xStart * cellSize, yEnd * cellSize);
-    ctx.stroke();
+// Movement
+window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowUp" && player.y > 0 && maze[player.y - 1][player.x] === 0) {
+        player.y--;
+    }
+    if (e.key === "ArrowDown" && player.y < maze.length - 1 && maze[player.y + 1][player.x] === 0) {
+        player.y++;
+    }
+    if (e.key === "ArrowLeft" && player.x > 0 && maze[player.y][player.x - 1] === 0) {
+        player.x--;
+    }
+    if (e.key === "ArrowRight" && player.x < maze[0].length - 1 && maze[player.y][player.x + 1] === 0) {
+        player.x++;
+    }
+    gameLoop();
+});
+
+// Game loop
+function gameLoop() {
+    drawMaze();
+    drawPlayer();
 }
 
-drawMaze();
+// Start
+gameLoop();
