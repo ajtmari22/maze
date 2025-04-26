@@ -71,3 +71,54 @@
     const backgroundX = -(currentFrame * frameWidth);
     const backgroundY = -(direction * frameHeight);
     player.style.backgroundPosition = `${backgroundX}px ${backgroundY}px`;
+  }
+
+  document.addEventListener('keydown', (e) => {
+    let nextX = playerX;
+    let nextY = playerY;
+    let moved = false;
+
+    if (e.key === 'ArrowUp') {
+      nextY -= step;
+      direction = 3; // up
+      moved = true;
+    }
+    if (e.key === 'ArrowDown') {
+      nextY += step;
+      direction = 0; // down
+      moved = true;
+    }
+    if (e.key === 'ArrowLeft') {
+      nextX -= step;
+      direction = 1; // left
+      moved = true;
+    }
+    if (e.key === 'ArrowRight') {
+      nextX += step;
+      direction = 2; // right
+      moved = true;
+    }
+
+    if (moved) {
+      const pixel = ctx.getImageData(nextX + frameWidth / 2, nextY + frameHeight / 2, 1, 1).data;
+      const r = pixel[0];
+      const g = pixel[1];
+      const b = pixel[2];
+
+      const isPath = r < 50 && g < 50 && b < 50;
+
+      if (isPath) {
+        playerX = nextX;
+        playerY = nextY;
+        player.style.transform = `translate(${playerX}px, ${playerY}px)`;
+
+        // Animate through frames only for the current direction
+        currentFrame = (currentFrame + 1) % totalFrames;
+        updatePlayerSprite();
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
