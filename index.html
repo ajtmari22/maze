@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Maze Game with Animated Character</title>
+  <title>Maze Game with Directional Animation</title>
   <style>
     body {
       background: black;
@@ -28,10 +28,10 @@
       z-index: 1;
     }
     .player {
-      width: 48px; /* size of one frame */
+      width: 48px; /* Size of one frame */
       height: 48px;
       background: url('sprite.png') no-repeat;
-      background-size: 192px 192px; /* 4 columns x 4 rows of frames */
+      background-size: 192px 192px; /* Full sprite sheet size */
       z-index: 2;
       transform: translate(10px, 10px);
     }
@@ -63,60 +63,11 @@
   const frameWidth = 48;
   const frameHeight = 48;
   let currentFrame = 0;
-  const totalFrames = 4; // 4 frames per row
+  const totalFrames = 4; // 4 frames per direction
+
   let direction = 0; // 0: down, 1: left, 2: right, 3: up
 
   function updatePlayerSprite() {
     const backgroundX = -(currentFrame * frameWidth);
     const backgroundY = -(direction * frameHeight);
     player.style.backgroundPosition = `${backgroundX}px ${backgroundY}px`;
-  }
-
-  document.addEventListener('keydown', (e) => {
-    let nextX = playerX;
-    let nextY = playerY;
-    let moved = false;
-
-    if (e.key === 'ArrowUp') {
-      nextY -= step;
-      direction = 3;
-      moved = true;
-    }
-    if (e.key === 'ArrowDown') {
-      nextY += step;
-      direction = 0;
-      moved = true;
-    }
-    if (e.key === 'ArrowLeft') {
-      nextX -= step;
-      direction = 1;
-      moved = true;
-    }
-    if (e.key === 'ArrowRight') {
-      nextX += step;
-      direction = 2;
-      moved = true;
-    }
-
-    if (moved) {
-      const pixel = ctx.getImageData(nextX + frameWidth/2, nextY + frameHeight/2, 1, 1).data;
-      const r = pixel[0];
-      const g = pixel[1];
-      const b = pixel[2];
-
-      const isPath = r < 50 && g < 50 && b < 50;
-
-      if (isPath) {
-        playerX = nextX;
-        playerY = nextY;
-        player.style.transform = `translate(${playerX}px, ${playerY}px)`;
-
-        currentFrame = (currentFrame + 1) % totalFrames;
-        updatePlayerSprite();
-      }
-    }
-  });
-</script>
-
-</body>
-</html>
