@@ -28,37 +28,44 @@
       z-index: 1;
     }
 
+    /* Default player style */
     .player {
       width: 48px;
       height: 48px;
       background: url('sprite_down.png') no-repeat 0 0;
+      background-size: cover;
       z-index: 2;
+      transform: translate(10px, 10px); /* start position */
     }
 
-    /*Sprite*/
+    /* Animations */
     .walk-down {
-      background: url('sprite_down.png') no repeat 0 0;
+      background: url('sprite_down.png') no-repeat 0 0;
       width: 48px;
       height: 48px;
       animation: walkDown 0.6s steps(4) infinite;
+      background-size: cover;
     }
     .walk-left {
-       background: url('sprite_left.png') no repeat 0 0;
+      background: url('sprite_left.png') no-repeat 0 0;
       width: 48px;
       height: 48px;
       animation: walkLeft 0.6s steps(4) infinite;
+      background-size: cover;
     }
     .walk-right {
-       background: url('sprite_right.png') no repeat 0 0;
+      background: url('sprite_right.png') no-repeat 0 0;
       width: 48px;
       height: 48px;
       animation: walkRight 0.6s steps(4) infinite;
+      background-size: cover;
     }
     .walk-up {
-       background: url('sprite_up.png') no repeat 0 0;
+      background: url('sprite_up.png') no-repeat 0 0;
       width: 48px;
       height: 48px;
       animation: walkUp 0.6s steps(4) infinite;
+      background-size: cover;
     }
 
     /* Keyframes */
@@ -67,18 +74,17 @@
       to { background-position: -192px 0px; }
     }
     @keyframes walkLeft {
-      from { background-position: 0px -48px; }
-      to { background-position: -192px -48px; }
+      from { background-position: 0px 0px; }
+      to { background-position: -192px 0px; }
     }
     @keyframes walkRight {
-      from { background-position: 0px -96px; }
-      to { background-position: -192px -96px; }
+      from { background-position: 0px 0px; }
+      to { background-position: -192px 0px; }
     }
     @keyframes walkUp {
-      from { background-position: 0px -144px; }
-      to { background-position: -192px -144px; }
+      from { background-position: 0px 0px; }
+      to { background-position: -192px 0px; }
     }
-
   </style>
 </head>
 <body>
@@ -112,6 +118,7 @@
 
   document.addEventListener('keyup', (e) => {
     delete keysPressed[e.key];
+    clearAnimation();
   });
 
   function movePlayer() {
@@ -121,38 +128,45 @@
       playerY -= step;
       setAnimation('up');
       moved = true;
-    } else if (keysPressed['ArrowDown']) {
+    }
+    if (keysPressed['ArrowDown']) {
       playerY += step;
       setAnimation('down');
       moved = true;
-    } else if (keysPressed['ArrowLeft']) {
+    }
+    if (keysPressed['ArrowLeft']) {
       playerX -= step;
       setAnimation('left');
       moved = true;
-    } else if (keysPressed['ArrowRight']) {
+    }
+    if (keysPressed['ArrowRight']) {
       playerX += step;
       setAnimation('right');
       moved = true;
-    } else {
+    }
+
+    if (!moved) {
       clearAnimation();
     }
 
-    //Para di maka walk past sa wall
-    const pixel = ctx.getImageData(playerX + 24, playerY + 24, 1, 1).data;
-    const r = pixel[0];
-    const g = pixel[1];
-    const b = pixel[2];
+    // Wall collision detection
+    try {
+      const pixel = ctx.getImageData(playerX + 24, playerY + 24, 1, 1).data;
+      const [r, g, b] = pixel;
 
-    const isPath = r < 50 && g < 50 && b < 50;
+      const isPath = r < 50 && g < 50 && b < 50;
 
-    if (isPath) {
-      player.style.transform = `translate(${playerX}px, ${playerY}px)`;
-    } else {
-      // Undo movement if hit wall
-      if (keysPressed['ArrowUp']) playerY += step;
-      if (keysPressed['ArrowDown']) playerY -= step;
-      if (keysPressed['ArrowLeft']) playerX += step;
-      if (keysPressed['ArrowRight']) playerX -= step;
+      if (isPath) {
+        player.style.transform = `translate(${playerX}px, ${playerY}px)`;
+      } else {
+        // Undo movement if hit wall
+        if (keysPressed['ArrowUp']) playerY += step;
+        if (keysPressed['ArrowDown']) playerY -= step;
+        if (keysPressed['ArrowLeft']) playerX += step;
+        if (keysPressed['ArrowRight']) playerX -= step;
+      }
+    } catch (err) {
+      // If player goes outside canvas
     }
   }
 
