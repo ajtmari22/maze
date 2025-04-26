@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Maze</title>
+<title>Maze Game</title>
 <style>
     body {
         background: black;
@@ -14,7 +14,6 @@
     }
     canvas {
         background: black;
-        display: block;
     }
 </style>
 </head>
@@ -22,12 +21,11 @@
 <canvas id="gameCanvas" width="320" height="320"></canvas>
 
 <script>
-    const canvas = document.getElementById("gameCanvas");
+const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const tileSize = 20;  // Each tile is 20px
+const tileSize = 20;
 
-// Maze definition: 1 = wall, 0 = path
 const maze = [
   [1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1],
   [1,0,0,1,0,1,0,0,1,0,0,0,1,0,0,1],
@@ -48,9 +46,9 @@ const maze = [
 ];
 
 // Player
-let player = { x: 4, y: 0 }; // Start where path (0) is
+let player = { x: 4, y: 0 };
 
-// Draw maze using lines
+// Draw maze with LINES instead of blocks
 function drawMaze() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = "white";
@@ -59,25 +57,28 @@ function drawMaze() {
     for (let y = 0; y < maze.length; y++) {
         for (let x = 0; x < maze[y].length; x++) {
             if (maze[y][x] === 1) {
-                let px = x * tileSize;
-                let py = y * tileSize;
+                const px = x * tileSize;
+                const py = y * tileSize;
 
                 ctx.beginPath();
-                // Draw walls
-                if (y === 0 || maze[y-1][x] === 0) {
+                // Top wall
+                if (y == 0 || maze[y-1][x] === 0) {
                     ctx.moveTo(px, py);
                     ctx.lineTo(px + tileSize, py);
                 }
-                if (x === 0 || maze[y][x-1] === 0) {
+                // Left wall
+                if (x == 0 || maze[y][x-1] === 0) {
                     ctx.moveTo(px, py);
                     ctx.lineTo(px, py + tileSize);
                 }
-                if (x === maze[y].length-1 || maze[y][x+1] === 0) {
-                    ctx.moveTo(px + tileSize, py);
+                // Bottom wall
+                if (y == maze.length-1 || maze[y+1][x] === 0) {
+                    ctx.moveTo(px, py + tileSize);
                     ctx.lineTo(px + tileSize, py + tileSize);
                 }
-                if (y === maze.length-1 || maze[y+1][x] === 0) {
-                    ctx.moveTo(px, py + tileSize);
+                // Right wall
+                if (x == maze[y].length-1 || maze[y][x+1] === 0) {
+                    ctx.moveTo(px + tileSize, py);
                     ctx.lineTo(px + tileSize, py + tileSize);
                 }
                 ctx.stroke();
@@ -116,8 +117,7 @@ function gameLoop() {
 }
 
 gameLoop();
-
 </script>
+
 </body>
 </html>
-
