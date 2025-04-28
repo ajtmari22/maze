@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Maze Game with CSS Animations</title>
+  <title>Maze Game - Working Character</title>
   <style>
     body {
       background: black;
@@ -28,62 +28,21 @@
       z-index: 1;
     }
 
-    /* Default player style */
+    /* Fixed Player style*/
     .player {
-      width: 48px;
-      height: 48px;
-      background: url('sprite_down.png') no-repeat 0 0;
-      background-size: cover;
+      width: 30px;
+      height: 30px;
+      background: limegreen; /* bright color so it's visible */
+      border: 2px solid white;
+      border-radius: 5px;
       z-index: 2;
       transform: translate(10px, 10px); /* start position */
+      transition: transform 0.05s linear;
     }
 
-    /* Animations */
-    .walk-down {
-      background: url('sprite_down.png') no-repeat 0 0;
-      width: 48px;
-      height: 48px;
-      animation: walkDown 0.6s steps(4) infinite;
-      background-size: cover;
-    }
-    .walk-left {
-      background: url('sprite_left.png') no-repeat 0 0;
-      width: 48px;
-      height: 48px;
-      animation: walkLeft 0.6s steps(4) infinite;
-      background-size: cover;
-    }
-    .walk-right {
-      background: url('sprite_right.png') no-repeat 0 0;
-      width: 48px;
-      height: 48px;
-      animation: walkRight 0.6s steps(4) infinite;
-      background-size: cover;
-    }
-    .walk-up {
-      background: url('sprite_up.png') no-repeat 0 0;
-      width: 48px;
-      height: 48px;
-      animation: walkUp 0.6s steps(4) infinite;
-      background-size: cover;
-    }
-
-    /* Keyframes */
-    @keyframes walkDown {
-      from { background-position: 0px 0px; }
-      to { background-position: -192px 0px; }
-    }
-    @keyframes walkLeft {
-      from { background-position: 0px 0px; }
-      to { background-position: -192px 0px; }
-    }
-    @keyframes walkRight {
-      from { background-position: 0px 0px; }
-      to { background-position: -192px 0px; }
-    }
-    @keyframes walkUp {
-      from { background-position: 0px 0px; }
-      to { background-position: -192px 0px; }
+    /* Walk animations*/
+    .walk-up, .walk-down, .walk-left, .walk-right {
+      animation: none; /* disable animations */
     }
   </style>
 </head>
@@ -151,7 +110,7 @@
 
     // Wall collision detection
     try {
-      const pixel = ctx.getImageData(playerX + 24, playerY + 24, 1, 1).data;
+      const pixel = ctx.getImageData(playerX + 15, playerY + 15, 1, 1).data; 
       const [r, g, b] = pixel;
 
       const isPath = r < 50 && g < 50 && b < 50;
@@ -166,7 +125,7 @@
         if (keysPressed['ArrowRight']) playerX -= step;
       }
     } catch (err) {
-      // If player goes outside canvas
+      // Player went out of bounds
     }
   }
 
