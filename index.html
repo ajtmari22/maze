@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Maze Game with CSS Animations</title>
+  <title>Maze Game with Walking Animation</title>
   <style>
     body {
       background: black;
@@ -27,44 +27,37 @@
       height: 100%;
       z-index: 1;
     }
-
-    /* Default player style */
     .player {
-      width: 64px;
-      height: 64px;
-      background: url('sprite_up.png') no-repeat 0 0;
-      background-size: 256px 64px; /* 4 frames horizontally */
+      width: 48px;
+      height: 48px;
+      background: url('sprite_down.png') no-repeat 0 0;
+      background-size: cover;
       z-index: 2;
       transform: translate(10px, 10px);
-      transition: transform 0.05s linear;
     }
-
-    /* Animations */
     .walk-down {
-      background-image: url('sprite_down.png'); /* Temporary use up sprite */
+      background: url('sprite_down.png') no-repeat;
       animation: walk 0.6s steps(4) infinite;
-      background-size: 256px 64px;
+      background-size: cover;
     }
     .walk-left {
-      background-image: url('sprite_left.png');
+      background: url('sprite_left.png') no-repeat;
       animation: walk 0.6s steps(4) infinite;
-      background-size: 256px 61px;
+      background-size: cover;
     }
     .walk-right {
-      background-image: url('sprite_right.png');
+      background: url('sprite_right.png') no-repeat;
       animation: walk 0.6s steps(4) infinite;
-      background-size: 256px 65px;
+      background-size: cover;
     }
     .walk-up {
-      background-image: url('sprite_up.png');
+      background: url('sprite_up.png') no-repeat;
       animation: walk 0.6s steps(4) infinite;
-      background-size: 256px 64px;
+      background-size: cover;
     }
-
-    /* Keyframes */
     @keyframes walk {
       from { background-position: 0px 0px; }
-      to { background-position: -256px 0px; }
+      to { background-position: -192px 0px; }
     }
   </style>
 </head>
@@ -79,19 +72,16 @@
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
   const player = document.getElementById('player');
-  const step = 2.5;
+  const step = 3.5; // Move speed
+  let playerX = 10;
+  let playerY = 10;
+  let keysPressed = {};
 
   const mazeImage = new Image();
   mazeImage.src = "maze.png";
-
   mazeImage.onload = () => {
     ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
   };
-
-  let playerX = 10;
-  let playerY = 10;
-
-  let keysPressed = {};
 
   document.addEventListener('keydown', (e) => {
     keysPressed[e.key] = true;
@@ -109,18 +99,15 @@
       playerY -= step;
       setAnimation('up');
       moved = true;
-    }
-    if (keysPressed['ArrowDown']) {
+    } else if (keysPressed['ArrowDown']) {
       playerY += step;
       setAnimation('down');
       moved = true;
-    }
-    if (keysPressed['ArrowLeft']) {
+    } else if (keysPressed['ArrowLeft']) {
       playerX -= step;
       setAnimation('left');
       moved = true;
-    }
-    if (keysPressed['ArrowRight']) {
+    } else if (keysPressed['ArrowRight']) {
       playerX += step;
       setAnimation('right');
       moved = true;
@@ -130,21 +117,23 @@
       clearAnimation();
     }
 
+    // Collision Detection
     try {
-      const pixel = ctx.getImageData(playerX + 32, playerY + 32, 1, 1).data;
+      const pixel = ctx.getImageData(playerX + 24, playerY + 24, 1, 1).data;
       const [r, g, b] = pixel;
       const isPath = r < 50 && g < 50 && b < 50;
 
       if (isPath) {
         player.style.transform = `translate(${playerX}px, ${playerY}px)`;
       } else {
+        // Undo move if hit wall
         if (keysPressed['ArrowUp']) playerY += step;
         if (keysPressed['ArrowDown']) playerY -= step;
         if (keysPressed['ArrowLeft']) playerX += step;
         if (keysPressed['ArrowRight']) playerX -= step;
       }
     } catch (err) {
-      // If player goes outside canvas
+      // Do nothing if error
     }
   }
 
