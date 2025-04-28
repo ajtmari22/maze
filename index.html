@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Maze Game - Working Character</title>
+  <title>Maze Game with Sprites</title>
   <style>
     body {
       background: black;
@@ -28,21 +28,43 @@
       z-index: 1;
     }
 
-    /* Fixed Player style*/
+    /* Player settings based on your sprites */
     .player {
-      width: 30px;
-      height: 30px;
-      background: limegreen; /* bright color so it's visible */
-      border: 2px solid white;
-      border-radius: 5px;
+      width: 64px; /* Sprite width */
+      height: 64px; /* Approx height for good size */
+      background: url('/mnt/data/sprite_down.png') no-repeat 0 0;
+      background-size: 256px 64px; /* 4 frames wide */
       z-index: 2;
-      transform: translate(10px, 10px); /* start position */
+      transform: translate(10px, 10px);
       transition: transform 0.05s linear;
     }
 
-    /* Walk animations*/
-    .walk-up, .walk-down, .walk-left, .walk-right {
-      animation: none; /* disable animations */
+    /* Walking Animations */
+    .walk-down {
+      background-image: url('/mnt/data/sprite_down.png');
+      animation: walk 0.6s steps(4) infinite;
+      background-size: 256px 64px;
+    }
+    .walk-left {
+      background-image: url('/mnt/data/sprite_left.png');
+      animation: walk 0.6s steps(4) infinite;
+      background-size: 256px 64px;
+    }
+    .walk-right {
+      background-image: url('/mnt/data/sprite_right.png');
+      animation: walk 0.6s steps(4) infinite;
+      background-size: 256px 64px;
+    }
+    .walk-up {
+      background-image: url('/mnt/data/sprite_up.png');
+      animation: walk 0.6s steps(4) infinite;
+      background-size: 256px 64px;
+    }
+
+    /* Universal walk keyframes */
+    @keyframes walk {
+      from { background-position: 0 0; }
+      to { background-position: -256px 0; } /* 64px * 4 frames */
     }
   </style>
 </head>
@@ -110,7 +132,7 @@
 
     // Wall collision detection
     try {
-      const pixel = ctx.getImageData(playerX + 15, playerY + 15, 1, 1).data; 
+      const pixel = ctx.getImageData(playerX + 32, playerY + 32, 1, 1).data; // center of sprite
       const [r, g, b] = pixel;
 
       const isPath = r < 50 && g < 50 && b < 50;
@@ -118,14 +140,13 @@
       if (isPath) {
         player.style.transform = `translate(${playerX}px, ${playerY}px)`;
       } else {
-        // Undo movement if hit wall
         if (keysPressed['ArrowUp']) playerY += step;
         if (keysPressed['ArrowDown']) playerY -= step;
         if (keysPressed['ArrowLeft']) playerX += step;
         if (keysPressed['ArrowRight']) playerX -= step;
       }
     } catch (err) {
-      // Player went out of bounds
+      // Out of bounds
     }
   }
 
