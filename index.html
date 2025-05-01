@@ -6,33 +6,30 @@
   <style>
     body {
       background: black;
-      color: white;
-      font-family: sans-serif;
       margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
     }
-    .hud {
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      z-index: 3;
-      text-align: right;
-    }
+
     .maze-container {
       position: relative;
       width: 500px;
       height: 500px;
-      margin: 100px auto;
+      margin: 50px auto;
     }
+
     canvas, .player {
       position: absolute;
       top: 0;
       left: 0;
     }
+
     canvas {
       width: 100%;
       height: 100%;
       z-index: 1;
     }
+
     .player {
       width: 48px;
       height: 48px;
@@ -41,29 +38,67 @@
       z-index: 2;
       transform: translate(10px, 10px);
     }
+
     .walk-down {
       background: url('sprite_down.png') no-repeat -60px -13px;
       width: 72px;
       height: 72px;
       animation: walk1 0.6s steps(4) infinite;
     }
+
     .walk-left {
       background: url('sprite.png') no-repeat -60px -127px;
       width: 72px;
       height: 72px;
       animation: walk2 0.6s steps(4) infinite;
     }
+
     .walk-right {
       background: url('sprite.png') no-repeat -60px -190px;
       width: 72px;
       height: 72px;
       animation: walk3 0.6s steps(4) infinite;
     }
+
     .walk-up {
       background: url('sprite.png') no-repeat -60px -210px;
       animation: walk4 0.6s steps(4) infinite;
       background-size: cover;
     }
+
+    @keyframes walk1 {
+      from {background-position: -60px -13px}
+      to {background-position: -318px -13px}
+    }
+
+    @keyframes walk2 {
+      from { background-position: -60px -127px; }
+      to { background-position: -318px -127px; }
+    }
+
+    @keyframes walk3 {
+      from {background-position: -60px -190px}
+      to {background-position: -318px -190px}
+    }
+
+    @keyframes walk4 {
+      from{background-position: -60px -210px}
+      to {background-position: -318px -210px}
+    }
+
+    #timer, #score {
+      color: white;
+      position: fixed;
+      top: 10px;
+      right: 20px;
+      font-size: 18px;
+      z-index: 10;
+    }
+
+    #score {
+      top: 40px;
+    }
+
     .jumpscare {
       position: fixed;
       top: 0;
@@ -71,95 +106,71 @@
       width: 100vw;
       height: 100vh;
       background-color: black;
-      display: none;
-      justify-content: center;
-      align-items: center;
+      background-size: cover;
+      background-position: center;
       z-index: 999;
-    }
-    .jumpscare img {
-      width: 80vw;
-      max-width: 600px;
-      animation: shake 0.3s infinite;
-    }
-    @keyframes shake {
-      0% { transform: translate(0, 0); }
-      25% { transform: translate(-5px, 5px); }
-      50% { transform: translate(5px, -5px); }
-      75% { transform: translate(-5px, -5px); }
-      100% { transform: translate(5px, 5px); }
-    }
-    @keyframes walk1 {
-      from {background-position: -60px -13px}
-      to {background-position: -318px -13px}
-    }
-    @keyframes walk2 {
-      from { background-position: -60px -127px; }
-      to { background-position: -318px -127px; }
-    }
-    @keyframes walk3 {
-      from {background-position: -60px -190px}
-      to{background-position: -318px -190px}
-    }
-    @keyframes walk4 {
-      from{background-position: -60px -210px}
-      to {background-position: -318px -210px}
+      display: none;
     }
   </style>
 </head>
 <body>
 
-<div class="hud">
-  <div id="timer">Time: 60</div>
-  <div id="score">Score: 0</div>
-</div>
+<div id="timer">Time: 60</div>
+<div id="score">Score: 0</div>
 
 <div class="maze-container">
   <canvas id="mazeCanvas" width="500" height="500"></canvas>
   <div class="player" id="player"></div>
 </div>
 
-<div class="jumpscare" id="jumpscare">
-  <img id="jumpscareImg" src="" alt="jumpscare">
-</div>
+<div class="jumpscare" id="jumpscare"></div>
 
 <script>
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
   const player = document.getElementById('player');
+  const jumpscare = document.getElementById('jumpscare');
   const step = 3.5;
   let playerX = 10;
   let playerY = 10;
   let keysPressed = {};
   let score = 0;
-
-  const jumpscare = document.getElementById("jumpscare");
-  const jumpscareImg = document.getElementById("jumpscareImg");
-  const scareImages = ["ezjump1.jpg", "ezjump2.jpg"];
-  let jumpscareShown = [];
+  let timeLeft = 60;
+  let timerInterval;
 
   const mazeImage = new Image();
   mazeImage.src = "maze.png";
-  mazeImage.onload = () => ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
+  mazeImage.onload = () => {
+    ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
+  };
 
-  document.addEventListener('keydown', (e) => {
+  const jumpscares = [
+    "ezjump1.jpg",
+    "ezjump2.jpg"
+  ];
+
+  document.addEventListener('keydown', moveHandler);
+  document.addEventListener('keyup', keyUpHandler);
+
+  function moveHandler(e) {
     keysPressed[e.key.toLowerCase()] = true;
-  });
-
-  document.addEventListener('keyup', (e) => {
-    delete keysPressed[e.key.toLowerCase()];
-    clearAnimation();
-  });
-
-  function setAnimation(direction) {
-    player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
-    if (direction === 'up') player.classList.add('walk-up');
-    if (direction === 'down') player.classList.add('walk-down');
-    if (direction === 'left') player.classList.add('walk-left');
-    if (direction === 'right') player.classList.add('walk-right');
   }
 
-  function clearAnimation() {
-    player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
+  function keyUpHandler(e) {
+    delete keysPressed[e.key.toLowerCase()];
+    clearAnimation();
+  }
+
+  function startTimer() {
+    const timerDisplay = document.getElementById('timer');
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = `Time: ${timeLeft}`;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert("⏰ Time's up! You didn't complete the level.");
+      }
+    }, 1000);
   }
 
   function movePlayer() {
@@ -169,18 +180,15 @@
       playerY -= step;
       setAnimation('up');
       moved = true;
-    }
-    if (keysPressed['arrowdown'] || keysPressed['s']) {
+    } else if (keysPressed['arrowdown'] || keysPressed['s']) {
       playerY += step;
       setAnimation('down');
       moved = true;
-    }
-    if (keysPressed['arrowleft'] || keysPressed['a']) {
+    } else if (keysPressed['arrowleft'] || keysPressed['a']) {
       playerX -= step;
       setAnimation('left');
       moved = true;
-    }
-    if (keysPressed['arrowright'] || keysPressed['d']) {
+    } else if (keysPressed['arrowright'] || keysPressed['d']) {
       playerX += step;
       setAnimation('right');
       moved = true;
@@ -195,26 +203,55 @@
 
       if (isPath) {
         player.style.transform = `translate(${playerX}px, ${playerY}px)`;
-        score++;
-        document.getElementById("score").textContent = `Score: ${score}`;
-        maybeTriggerJumpscare();
       } else {
         if (keysPressed['arrowup'] || keysPressed['w']) playerY += step;
         if (keysPressed['arrowdown'] || keysPressed['s']) playerY -= step;
         if (keysPressed['arrowleft'] || keysPressed['a']) playerX += step;
         if (keysPressed['arrowright'] || keysPressed['d']) playerX -= step;
       }
-    } catch (e) {}
+    } catch (err) {}
+
+    triggerJumpscare();
+    checkWin();
   }
 
-  function maybeTriggerJumpscare() {
-    if (jumpscareShown.length >= 2) return;
-    if (Math.random() < 0.0025) { // 0.25% chance per frame
-      const img = scareImages[jumpscareShown.length];
-      jumpscareImg.src = img;
-      jumpscare.style.display = "flex";
-      jumpscareShown.push(img);
-      setTimeout(() => jumpscare.style.display = "none", 1500);
+  function setAnimation(direction) {
+    player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
+    if (direction === 'up') player.classList.add('walk-up');
+    if (direction === 'down') player.classList.add('walk-down');
+    if (direction === 'left') player.classList.add('walk-left');
+    if (direction === 'right') player.classList.add('walk-right');
+  }
+
+  function clearAnimation() {
+    player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
+  }
+
+  function checkWin() {
+    if (playerX > 450 && playerY > 450) {
+      clearInterval(timerInterval);
+      score = timeLeft * 10;
+      document.getElementById('score').textContent = `Score: ${score}`;
+      alert(`🎉 You won! Time left: ${timeLeft}s\n🏆 Score: ${score} points`);
+
+      // Optional: Freeze movement
+      document.removeEventListener('keydown', moveHandler);
+      document.removeEventListener('keyup', keyUpHandler);
+    }
+  }
+
+  let jumpscareCount = 0;
+  function triggerJumpscare() {
+    if (jumpscareCount >= 2) return;
+
+    if (Math.random() < 0.002) { // Small chance on every move
+      const img = jumpscares[Math.floor(Math.random() * jumpscares.length)];
+      jumpscare.style.backgroundImage = `url('${img}')`;
+      jumpscare.style.display = "block";
+      setTimeout(() => {
+        jumpscare.style.display = "none";
+      }, 700);
+      jumpscareCount++;
     }
   }
 
@@ -223,21 +260,8 @@
     requestAnimationFrame(gameLoop);
   }
 
-  function startTimer(duration) {
-    let timeLeft = duration;
-    const timerDisplay = document.getElementById('timer');
-    const countdown = setInterval(() => {
-      timeLeft--;
-      timerDisplay.textContent = `Time: ${timeLeft}`;
-      if (timeLeft <= 0) {
-        clearInterval(countdown);
-        alert("Time's up!");
-      }
-    }, 1000);
-  }
-
+  startTimer();
   gameLoop();
-  startTimer(60); // 60 seconds
 </script>
 
 </body>
