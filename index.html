@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EZ MODE</title>
+  <title>EZZ MODE</title>
   <style>
     body {
       background: black;
@@ -13,8 +13,8 @@
 
     .maze-container {
       position: relative;
-      width: 700px;
-      height: 700px;
+      width: 500px;
+      height: 500px;
       margin: 70px auto;
     }
 
@@ -134,8 +134,8 @@
     }
 
     #finishLine {
-      width: 48px;
-      height: 48px;
+      width: 30px;
+      height: 30px;
       top: 450px;
       left: 450px;
       background: linear-gradient(to right, limegreen, yellow);
@@ -183,6 +183,7 @@
   let score = 0;
   let timeLeft = 60;
   let timerInterval;
+  let timerStarted = false;
 
   const mazeImage = new Image();
   mazeImage.src = "maze.png";
@@ -190,28 +191,26 @@
     ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
   };
 
-  const jumpscares = [
-    "ezjump1.jpg",
-    "ezjump2.jpg"
-  ];
+  const jumpscares = ["ezjump1.jpg", "ezjump2.jpg"];
 
-  document.addEventListener('keydown', moveHandler);
-  document.addEventListener('keyup', keyUpHandler);
-
-  function moveHandler(e) {
+  document.addEventListener('keydown', (e) => {
     keysPressed[e.key.toLowerCase()] = true;
-  }
+    if (!timerStarted) {
+      startTimer();
+      timerStarted = true;
+    }
+  });
 
-  function keyUpHandler(e) {
+  document.addEventListener('keyup', (e) => {
     delete keysPressed[e.key.toLowerCase()];
     clearAnimation();
-  }
+  });
 
   function startTimer() {
     const timerDisplay = document.getElementById('timer');
     timerInterval = setInterval(() => {
       timeLeft--;
-      timerDisplay.textContent = Time: ${timeLeft};
+      timerDisplay.textContent = `Time: ${timeLeft}`;
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
         alert("⏰ Time's up! You didn't complete the level.");
@@ -252,8 +251,9 @@
       const isPath = r < 50 && g < 50 && b < 50;
 
       if (isPath) {
-        player.style.transform = translate(${playerX}px, ${playerY}px);
+        player.style.transform = `translate(${playerX}px, ${playerY}px)`;
       } else {
+        // Undo movement
         if (keysPressed['arrowup'] || keysPressed['w']) playerY += step;
         if (keysPressed['arrowdown'] || keysPressed['s']) playerY -= step;
         if (keysPressed['arrowleft'] || keysPressed['a']) playerX += step;
@@ -289,13 +289,9 @@
     ) {
       clearInterval(timerInterval);
       score = timeLeft * 10;
-      document.getElementById('score').textContent = Score: ${score};
-      document.getElementById('finalScore').textContent = Your final score: ${score};
+      document.getElementById('score').textContent = `Score: ${score}`;
+      document.getElementById('finalScore').textContent = `Your final score: ${score}`;
       document.getElementById('winPopup').style.display = 'block';
-
-      // Freeze movement
-      document.removeEventListener('keydown', moveHandler);
-      document.removeEventListener('keyup', keyUpHandler);
     }
   }
 
@@ -305,7 +301,7 @@
 
     if (Math.random() < 0.002) {
       const img = jumpscares[Math.floor(Math.random() * jumpscares.length)];
-      jumpscare.style.backgroundImage = url('${img}');
+      jumpscare.style.backgroundImage = `url('${img}')`;
       jumpscare.style.display = "block";
       setTimeout(() => {
         jumpscare.style.display = "none";
@@ -319,7 +315,6 @@
     requestAnimationFrame(gameLoop);
   }
 
-  startTimer();
   gameLoop();
 </script>
 
