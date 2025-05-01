@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EZ MODE</title>
+  <title>EZZ MODE</title>
   <style>
     body {
       background: black;
@@ -13,8 +13,8 @@
 
     .maze-container {
       position: relative;
-      width: 1000px;
-      height: 1000px;
+      width: 800px;
+      height: 800px;
       margin: 70px auto;
     }
 
@@ -36,7 +36,7 @@
       background: url('sprite.png') no-repeat 0 0;
       background-size: cover;
       z-index: 2;
-      transform: translate(10px, 10px);
+      transform: translate(0px, 320px); /* Updated for start position */
     }
 
     .walk-down {
@@ -136,8 +136,8 @@
     #finishLine {
       width: 40px;
       height: 40px;
-      top: 920px;
-      left: 940px;
+      top: 320px; /* Updated Y position */
+      left: 760px; /* Updated X position */
       background: linear-gradient(to right, limegreen, yellow);
       z-index: 1;
       border: 2px solid white;
@@ -157,7 +157,7 @@
 <div id="score">Score: 0</div>
 
 <div class="maze-container">
-  <canvas id="mazeCanvas" width="1000" height="1000"></canvas>
+  <canvas id="mazeCanvas" width="800" height="800"></canvas>
   <div id="finishLine"></div>
   <div class="player" id="player"></div>
 </div>
@@ -177,8 +177,11 @@ const ctx = canvas.getContext('2d');
 const player = document.getElementById('player');
 const jumpscare = document.getElementById('jumpscare');
 const step = 3.5;
-let playerX = 10;
-let playerY = 10;
+
+// 🔵 NEW START POSITION (blue circle)
+let playerX = 0;
+let playerY = 320;
+
 let keysPressed = {};
 let score = 0;
 let timeLeft = 60;
@@ -294,17 +297,14 @@ function checkWin() {
   }
 }
 
-let jumpscareCount = 0;
 function triggerJumpscare() {
-  if (jumpscareCount >= 2) return;
-  if (Math.random() < 0.002) {
+  if (Math.random() < 0.005) { // Slightly more frequent
     const img = jumpscares[Math.floor(Math.random() * jumpscares.length)];
     jumpscare.style.backgroundImage = `url('${img}')`;
     jumpscare.style.display = "block";
     setTimeout(() => {
       jumpscare.style.display = "none";
     }, 700);
-    jumpscareCount++;
   }
 }
 
