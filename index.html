@@ -36,7 +36,7 @@
       transform: translate(10px, 10px);
     }
     .walk-down {
-      background: url('sprite_down.png') no-repeat -60px -60px
+      background: url('sprite_down.png') no-repeat -60px -60px;
       width: 72px;
       height: 72px;
       animation: walk1 0.6s steps(4) infinite;
@@ -59,16 +59,16 @@
       background-size: cover;
     }
     @keyframes walk1 {
-      from {}
-      to {}
+      from {background-position: -60px -60px}
+      to {background-position: -318px -60px}
     }
     @keyframes walk2 {
       from { background-position: -60px -127px; }
       to { background-position: -318px -127px; }
     }
     @keyframes walk3 {
-      from {}
-      to{}
+      from {background-postion: -60px -210px}
+      to{background-position: -318px -210px}
     }
     @keyframes walk4 {
       from{}
