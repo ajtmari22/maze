@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EZ MOD</title>
+  <title>EASY MODE</title>
   <style>
     body {
       background: black;
@@ -14,25 +14,21 @@
       color: white;
       font-family: Arial, sans-serif;
     }
-
     .maze-container {
       position: relative;
       width: 500px;
       height: 500px;
     }
-
     canvas, .player {
       position: absolute;
       top: 0;
       left: 0;
     }
-
     canvas {
       width: 100%;
       height: 100%;
       z-index: 1;
     }
-
     .player {
       width: 32px;
       height: 32px;
@@ -44,26 +40,22 @@
 
     .walk-down {
       background: url('sprite_down.png') no-repeat -60px -13px;
-      width: 32px;
-      height: 32px;
+      background-size: cover;
       animation: walk1 0.6s steps(4) infinite;
     }
     .walk-left {
       background: url('sprite.png') no-repeat -60px -127px;
-      width: 32px;
-      height: 32px;
+      background-size: cover;
       animation: walk2 0.6s steps(4) infinite;
     }
     .walk-right {
       background: url('sprite.png') no-repeat -60px -190px;
-      width: 32px;
-      height: 32px;
+      background-size: cover;
       animation: walk3 0.6s steps(4) infinite;
     }
     .walk-up {
       background: url('sprite.png') no-repeat -60px -210px;
-      width: 32px;
-      height: 32px;
+      background-size: cover;
       animation: walk4 0.6s steps(4) infinite;
     }
 
@@ -83,32 +75,23 @@
       from {background-position: -60px -210px}
       to {background-position: -318px -210px}
     }
-
     @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.5); opacity: 0.6; }
-      100% { transform: scale(1); opacity: 1; }
-    }
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
-    .dot {
-      animation: pulse 1.2s infinite;
-    }
+.dot {
+  animation: pulse 1.2s infinite;
+}
 
-    #timer, #scoreTop, #bestScore {
+
+    #timer {
       position: absolute;
       top: 10px;
       right: 20px;
       font-size: 20px;
       z-index: 5;
-      text-align: right;
-    }
-
-    #scoreTop {
-      top: 40px;
-    }
-
-    #bestScore {
-      top: 70px;
     }
 
     .dot {
@@ -124,11 +107,10 @@
       transform: translate(10px, 10px);
     }
 
-   .finish-dot {
-  background-color: limegreen;
-  transform: translate(450px, 450px); /* Adjust X and Y if needed */
-}
-
+    .finish-dot {
+      background-color: limegreen;
+      transform: translate(470px, 470px);
+    }
 
     .popup {
       display: none;
@@ -160,8 +142,6 @@
   <div class="dot start-dot"></div>
   <div class="dot finish-dot"></div>
   <div id="timer">Time: 60</div>
-  <div id="scoreTop">Score: 0</div>
-  <div id="bestScore">Best: 0</div>
   <div class="popup" id="winPopup">
     <h2>🎉 CONGRATULATIONS! YOU WON THE EASY ROUND!</h2>
     <p id="scoreDisplay">Points: 0</p>
@@ -177,8 +157,6 @@
   const timerEl = document.getElementById('timer');
   const popup = document.getElementById('winPopup');
   const scoreDisplay = document.getElementById('scoreDisplay');
-  const scoreTopEl = document.getElementById('scoreTop');
-  const bestScoreEl = document.getElementById('bestScore');
 
   let playerX = 10;
   let playerY = 10;
@@ -189,9 +167,6 @@
   const finishX = 470;
   const finishY = 470;
   const finishRadius = 10;
-
-  let bestScore = localStorage.getItem('bestScore') || 0;
-  bestScoreEl.textContent = `Best: ${bestScore}`;
 
   const mazeImage = new Image();
   mazeImage.src = "maze.png";
@@ -247,13 +222,12 @@
       }
     } catch (err) {}
 
-    const dx = (playerX + 16) - 460;  // Adjust if needed
-const dy = (playerY + 16) - 460;
-const distance = Math.sqrt(dx * dx + dy * dy);
-if (distance < 20 && !gameOver) {
-  winGame();
-}
-
+    // Check finish
+    const dx = (playerX + 16) - finishX;
+    const dy = (playerY + 16) - finishY;
+    if (Math.sqrt(dx * dx + dy * dy) < finishRadius + 10) {
+      winGame();
+    }
   }
 
   function setAnimation(direction) {
@@ -283,25 +257,15 @@ if (distance < 20 && !gameOver) {
     }
   }
 
- function winGame() {
-  gameOver = true;
-  clearInterval(timerInterval);
-  const points = timeLeft * 10;
-
-  if (points > bestScore) {
-    bestScore = points;
-    localStorage.setItem('bestScore', bestScore);
+  function winGame() {
+    gameOver = true;
+    const points = timeLeft * 10;
+    scoreDisplay.textContent = `Points: ${points}`;
+    popup.style.display = "block";
   }
 
-  setTimeout(() => {
-    scoreDisplay.textContent = `Points: ${points}`;
-    scoreTopEl.textContent = `Score: ${points}`;
-    bestScoreEl.textContent = `Best: ${bestScore}`;
-    popup.style.display = "block";
-  }, 300);
-}
   gameLoop();
-  const timerInterval = setInterval(updateTimer, 1000);
+  setInterval(updateTimer, 1000);
 </script>
 
 </body>
