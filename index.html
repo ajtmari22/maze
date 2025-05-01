@@ -6,32 +6,33 @@
   <style>
     body {
       background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
-      color: white;
+      overflow: hidden;
       font-family: Arial, sans-serif;
     }
+
     .maze-container {
       position: relative;
       width: 500px;
       height: 500px;
+      margin: 50px auto;
     }
+
     canvas, .player {
       position: absolute;
       top: 0;
       left: 0;
     }
+
     canvas {
       width: 100%;
       height: 100%;
       z-index: 1;
     }
+
     .player {
-      width: 32px;
-      height: 32px;
+      width: 48px;
+      height: 48px;
       background: url('sprite.png') no-repeat 0 0;
       background-size: cover;
       z-index: 2;
@@ -40,133 +41,129 @@
 
     .walk-down {
       background: url('sprite_down.png') no-repeat -60px -13px;
-      background-size: cover;
+      width: 72px;
+      height: 72px;
       animation: walk1 0.6s steps(4) infinite;
     }
+
     .walk-left {
       background: url('sprite.png') no-repeat -60px -127px;
-      background-size: cover;
+      width: 72px;
+      height: 72px;
       animation: walk2 0.6s steps(4) infinite;
     }
+
     .walk-right {
       background: url('sprite.png') no-repeat -60px -190px;
-      background-size: cover;
+      width: 72px;
+      height: 72px;
       animation: walk3 0.6s steps(4) infinite;
     }
+
     .walk-up {
       background: url('sprite.png') no-repeat -60px -210px;
-      background-size: cover;
       animation: walk4 0.6s steps(4) infinite;
+      background-size: cover;
     }
 
     @keyframes walk1 {
       from {background-position: -60px -13px}
       to {background-position: -318px -13px}
     }
+
     @keyframes walk2 {
-      from {background-position: -60px -127px;}
-      to {background-position: -318px -127px;}
+      from { background-position: -60px -127px; }
+      to { background-position: -318px -127px; }
     }
+
     @keyframes walk3 {
       from {background-position: -60px -190px}
       to {background-position: -318px -190px}
     }
+
     @keyframes walk4 {
-      from {background-position: -60px -210px}
+      from{background-position: -60px -210px}
       to {background-position: -318px -210px}
     }
-    @keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.5); opacity: 0.6; }
-  100% { transform: scale(1); opacity: 1; }
-}
 
-.dot {
-  animation: pulse 1.2s infinite;
-}
-
-
-    #timer {
-      position: absolute;
+    #timer, #score {
+      color: white;
+      position: fixed;
       top: 10px;
       right: 20px;
-      font-size: 20px;
-      z-index: 5;
-    }
-
-    .dot {
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      z-index: 3;
-    }
-
-    .start-dot {
-      background-color: white;
-      transform: translate(10px, 10px);
-    }
-
-    .finish-dot {
-      background-color: limegreen;
-      transform: translate(470px, 470px);
-    }
-
-    .popup {
-      display: none;
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -30%);
-      background: #222;
-      color: white;
-      padding: 20px 30px;
-      border-radius: 10px;
+      font-size: 18px;
       z-index: 10;
-      text-align: center;
     }
 
-    .popup button {
+    #score {
+      top: 40px;
+    }
+
+    .jumpscare {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: black;
+      background-size: cover;
+      background-position: center;
+      z-index: 999;
+      display: none;
+    }
+
+    .win-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      color: black;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .win-popup button {
       margin: 10px;
       padding: 8px 16px;
       font-size: 16px;
-      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
+<div id="timer">Time: 60</div>
+<div id="score">Score: 0</div>
+
 <div class="maze-container">
   <canvas id="mazeCanvas" width="500" height="500"></canvas>
   <div class="player" id="player"></div>
-  <div class="dot start-dot"></div>
-  <div class="dot finish-dot"></div>
-  <div id="timer">Time: 60</div>
-  <div class="popup" id="winPopup">
-    <h2>🎉 CONGRATULATIONS! YOU WON THE EASY ROUND!</h2>
-    <p id="scoreDisplay">Points: 0</p>
-    <button onclick="location.reload()">Yes</button>
-    <button onclick="alert('Thanks for playing!')">No</button>
-  </div>
+</div>
+
+<div class="jumpscare" id="jumpscare"></div>
+
+<div class="win-popup" id="winPopup">
+  <h2>🎉 CONGRATULATIONS! YOU WON THE EASY ROUND!</h2>
+  <p id="finalScore"></p>
+  <button onclick="location.reload()">Yes</button>
+  <button onclick="alert('Thanks for playing!')">No</button>
 </div>
 
 <script>
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
   const player = document.getElementById('player');
-  const timerEl = document.getElementById('timer');
-  const popup = document.getElementById('winPopup');
-  const scoreDisplay = document.getElementById('scoreDisplay');
-
+  const jumpscare = document.getElementById('jumpscare');
+  const step = 3.5;
   let playerX = 10;
   let playerY = 10;
   let keysPressed = {};
-  const step = 2.5;
+  let score = 0;
   let timeLeft = 60;
-  let gameOver = false;
-  const finishX = 470;
-  const finishY = 470;
-  const finishRadius = 10;
+  let timerInterval;
 
   const mazeImage = new Image();
   mazeImage.src = "maze.png";
@@ -174,17 +171,36 @@
     ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
   };
 
-  document.addEventListener('keydown', (e) => {
-    keysPressed[e.key.toLowerCase()] = true;
-  });
+  const jumpscares = [
+    "ezjump1.jpg",
+    "ezjump2.jpg"
+  ];
 
-  document.addEventListener('keyup', (e) => {
+  document.addEventListener('keydown', moveHandler);
+  document.addEventListener('keyup', keyUpHandler);
+
+  function moveHandler(e) {
+    keysPressed[e.key.toLowerCase()] = true;
+  }
+
+  function keyUpHandler(e) {
     delete keysPressed[e.key.toLowerCase()];
     clearAnimation();
-  });
+  }
+
+  function startTimer() {
+    const timerDisplay = document.getElementById('timer');
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerDisplay.textContent = `Time: ${timeLeft}`;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert("⏰ Time's up! You didn't complete the level.");
+      }
+    }, 1000);
+  }
 
   function movePlayer() {
-    if (gameOver) return;
     let moved = false;
 
     if (keysPressed['arrowup'] || keysPressed['w']) {
@@ -208,7 +224,7 @@
     if (!moved) clearAnimation();
 
     try {
-      const pixel = ctx.getImageData(playerX + 16, playerY + 16, 1, 1).data;
+      const pixel = ctx.getImageData(playerX + 24, playerY + 24, 1, 1).data;
       const [r, g, b] = pixel;
       const isPath = r < 50 && g < 50 && b < 50;
 
@@ -222,12 +238,8 @@
       }
     } catch (err) {}
 
-    // Check finish
-    const dx = (playerX + 16) - finishX;
-    const dy = (playerY + 16) - finishY;
-    if (Math.sqrt(dx * dx + dy * dy) < finishRadius + 10) {
-      winGame();
-    }
+    triggerJumpscare();
+    checkWin();
   }
 
   function setAnimation(direction) {
@@ -242,30 +254,41 @@
     player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
   }
 
-  function gameLoop() {
-    movePlayer();
-    if (!gameOver) requestAnimationFrame(gameLoop);
-  }
+  function checkWin() {
+    if (playerX > 450 && playerY > 450) {
+      clearInterval(timerInterval);
+      score = timeLeft * 10;
+      document.getElementById('score').textContent = `Score: ${score}`;
+      alert(`🎉 You won! Time left: ${timeLeft}s\n🏆 Score: ${score} points`);
 
-  function updateTimer() {
-    if (gameOver) return;
-    timeLeft--;
-    timerEl.textContent = `Time: ${timeLeft}`;
-    if (timeLeft <= 0) {
-      alert("⏰ Time's up! Try again.");
-      gameOver = true;
+      // Optional: Freeze movement
+      document.removeEventListener('keydown', moveHandler);
+      document.removeEventListener('keyup', keyUpHandler);
     }
   }
 
-  function winGame() {
-    gameOver = true;
-    const points = timeLeft * 10;
-    scoreDisplay.textContent = `Points: ${points}`;
-    popup.style.display = "block";
+  let jumpscareCount = 0;
+  function triggerJumpscare() {
+    if (jumpscareCount >= 2) return;
+
+    if (Math.random() < 0.002) { // Small chance on every move
+      const img = jumpscares[Math.floor(Math.random() * jumpscares.length)];
+      jumpscare.style.backgroundImage = `url('${img}')`;
+      jumpscare.style.display = "block";
+      setTimeout(() => {
+        jumpscare.style.display = "none";
+      }, 700);
+      jumpscareCount++;
+    }
   }
 
+  function gameLoop() {
+    movePlayer();
+    requestAnimationFrame(gameLoop);
+  }
+
+  startTimer();
   gameLoop();
-  setInterval(updateTimer, 1000);
 </script>
 
 </body>
