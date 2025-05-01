@@ -18,7 +18,7 @@
       margin: 70px auto;
     }
 
-    canvas, .player {
+    canvas, .player, #finishLine {
       position: absolute;
       top: 0;
       left: 0;
@@ -132,6 +132,23 @@
       padding: 8px 16px;
       font-size: 16px;
     }
+
+    #finishLine {
+      width: 48px;
+      height: 48px;
+      top: 450px;
+      left: 450px;
+      background: linear-gradient(to right, limegreen, yellow);
+      z-index: 1;
+      border: 2px solid white;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 5px 2px limegreen; }
+      50% { box-shadow: 0 0 15px 5px yellow; }
+      100% { box-shadow: 0 0 5px 2px limegreen; }
+    }
   </style>
 </head>
 <body>
@@ -141,16 +158,17 @@
 
 <div class="maze-container">
   <canvas id="mazeCanvas" width="500" height="500"></canvas>
+  <div id="finishLine"></div>
   <div class="player" id="player"></div>
 </div>
 
 <div class="jumpscare" id="jumpscare"></div>
 
 <div class="win-popup" id="winPopup">
-  <h2>🎉 CONGRATULATIONS! YOU WON THE EASY ROUND!</h2>
+  <h2>🎉 CONGRATULATIONS! YOU FINISHED THE MAZE!</h2>
   <p id="finalScore"></p>
-  <button onclick="location.reload()">Yes</button>
-  <button onclick="alert('Thanks for playing!')">No</button>
+  <button onclick="location.reload()">Play Again</button>
+  <button onclick="alert('Thanks for playing!')">Exit</button>
 </div>
 
 <script>
@@ -193,7 +211,7 @@
     const timerDisplay = document.getElementById('timer');
     timerInterval = setInterval(() => {
       timeLeft--;
-      timerDisplay.textContent = `Time: ${timeLeft}`;
+      timerDisplay.textContent = Time: ${timeLeft};
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
         alert("⏰ Time's up! You didn't complete the level.");
@@ -222,6 +240,10 @@
       moved = true;
     }
 
+    // Keep player within bounds
+    playerX = Math.max(0, Math.min(playerX, canvas.width - 48));
+    playerY = Math.max(0, Math.min(playerY, canvas.height - 48));
+
     if (!moved) clearAnimation();
 
     try {
@@ -230,7 +252,7 @@
       const isPath = r < 50 && g < 50 && b < 50;
 
       if (isPath) {
-        player.style.transform = `translate(${playerX}px, ${playerY}px)`;
+        player.style.transform = translate(${playerX}px, ${playerY}px);
       } else {
         if (keysPressed['arrowup'] || keysPressed['w']) playerY += step;
         if (keysPressed['arrowdown'] || keysPressed['s']) playerY -= step;
@@ -256,13 +278,22 @@
   }
 
   function checkWin() {
-    if (playerX > 450 && playerY > 450) {
+    const finish = document.getElementById('finishLine').getBoundingClientRect();
+    const playerRect = player.getBoundingClientRect();
+
+    if (
+      playerRect.left < finish.right &&
+      playerRect.right > finish.left &&
+      playerRect.top < finish.bottom &&
+      playerRect.bottom > finish.top
+    ) {
       clearInterval(timerInterval);
       score = timeLeft * 10;
-      document.getElementById('score').textContent = `Score: ${score}`;
-      alert(`🎉 You won! Time left: ${timeLeft}s\n🏆 Score: ${score} points`);
+      document.getElementById('score').textContent = Score: ${score};
+      document.getElementById('finalScore').textContent = Your final score: ${score};
+      document.getElementById('winPopup').style.display = 'block';
 
-      // Optional: Freeze movement
+      // Freeze movement
       document.removeEventListener('keydown', moveHandler);
       document.removeEventListener('keyup', keyUpHandler);
     }
@@ -272,9 +303,9 @@
   function triggerJumpscare() {
     if (jumpscareCount >= 2) return;
 
-    if (Math.random() < 0.002) { // Small chance on every move
+    if (Math.random() < 0.002) {
       const img = jumpscares[Math.floor(Math.random() * jumpscares.length)];
-      jumpscare.style.backgroundImage = `url('${img}')`;
+      jumpscare.style.backgroundImage = url('${img}');
       jumpscare.style.display = "block";
       setTimeout(() => {
         jumpscare.style.display = "none";
