@@ -30,34 +30,49 @@
     .player {
       width: 48px;
       height: 48px;
-      background: url('sprite_down.png') no-repeat 0 0;
+      background: url('sprite.png') no-repeat 0 0;
       background-size: cover;
       z-index: 2;
       transform: translate(10px, 10px);
     }
     .walk-down {
-      background: url('sprite_down.png') no-repeat;
-      animation: walk 0.6s steps(4) infinite;
-      background-size: cover;
+      background: url('sprite_down.png') no-repeat -60px -60px
+      width: 72px;
+      height: 72px;
+      animation: walk1 0.6s steps(4) infinite;
     }
     .walk-left {
-      background: url('sprite_left.png') no-repeat;
-      animation: walk 0.6s steps(4) infinite;
-      background-size: cover;
+      background: url('sprite.png') no-repeat -60px -127px;
+      width: 72px;
+      height: 72px;
+      animation: walk2 0.6s steps(4) infinite;
     }
     .walk-right {
-      background: url('sprite_right.png') no-repeat;
-      animation: walk 0.6s steps(4) infinite;
-      background-size: cover;
+      background: url('sprite.png') no-repeat -60px -150px;
+      width: 72px;
+      height: 72px;
+      animation: walk3 0.6s steps(4) infinite;
     }
     .walk-up {
-      background: url('sprite_up.png') no-repeat;
-      animation: walk 0.6s steps(4) infinite;
+      background: url('sprite.png') no-repeat;
+      animation: walk4 0.6s steps(4) infinite;
       background-size: cover;
     }
-    @keyframes walk {
-      from { background-position: 0px 0px; }
-      to { background-position: -192px 0px; }
+    @keyframes walk1 {
+      from {}
+      to {}
+    }
+    @keyframes walk2 {
+      from { background-position: -60px -127px; }
+      to { background-position: -318px -127px; }
+    }
+    @keyframes walk3 {
+      from {}
+      to{}
+    }
+    @keyframes walk4 {
+      from{}
+      to {}
     }
   </style>
 </head>
