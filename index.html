@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EZZ MODE</title>
+  <title>EZ MODE</title>
   <style>
     body {
       background: black;
@@ -13,8 +13,8 @@
 
     .maze-container {
       position: relative;
-      width: 500px;
-      height: 500px;
+      width: 1000px;
+      height: 1000px;
       margin: 70px auto;
     }
 
@@ -31,8 +31,8 @@
     }
 
     .player {
-      width: 48px;
-      height: 48px;
+      width: 72px;
+      height: 72px;
       background: url('sprite.png') no-repeat 0 0;
       background-size: cover;
       z-index: 2;
@@ -134,10 +134,10 @@
     }
 
     #finishLine {
-      width: 30px;
-      height: 30px;
-      top: 450px;
-      left: 450px;
+      width: 40px;
+      height: 40px;
+      top: 920px;
+      left: 940px;
       background: linear-gradient(to right, limegreen, yellow);
       z-index: 1;
       border: 2px solid white;
@@ -157,7 +157,7 @@
 <div id="score">Score: 0</div>
 
 <div class="maze-container">
-  <canvas id="mazeCanvas" width="500" height="500"></canvas>
+  <canvas id="mazeCanvas" width="1000" height="1000"></canvas>
   <div id="finishLine"></div>
   <div class="player" id="player"></div>
 </div>
@@ -172,150 +172,148 @@
 </div>
 
 <script>
-  const canvas = document.getElementById('mazeCanvas');
-  const ctx = canvas.getContext('2d');
-  const player = document.getElementById('player');
-  const jumpscare = document.getElementById('jumpscare');
-  const step = 3.5;
-  let playerX = 10;
-  let playerY = 10;
-  let keysPressed = {};
-  let score = 0;
-  let timeLeft = 60;
-  let timerInterval;
-  let timerStarted = false;
+const canvas = document.getElementById('mazeCanvas');
+const ctx = canvas.getContext('2d');
+const player = document.getElementById('player');
+const jumpscare = document.getElementById('jumpscare');
+const step = 3.5;
+let playerX = 10;
+let playerY = 10;
+let keysPressed = {};
+let score = 0;
+let timeLeft = 60;
+let timerInterval;
+let timerStarted = false;
 
-  const mazeImage = new Image();
-  mazeImage.src = "maze.png";
-  mazeImage.onload = () => {
-    ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
-  };
+const mazeImage = new Image();
+mazeImage.src = "maze.png";
+mazeImage.onload = () => {
+  ctx.drawImage(mazeImage, 0, 0, canvas.width, canvas.height);
+};
 
-  const jumpscares = ["ezjump1.jpg", "ezjump2.jpg"];
+const jumpscares = ["ezjump1.jpg", "ezjump2.jpg"];
 
-  document.addEventListener('keydown', (e) => {
-    keysPressed[e.key.toLowerCase()] = true;
-    if (!timerStarted) {
-      startTimer();
-      timerStarted = true;
-    }
-  });
-
-  document.addEventListener('keyup', (e) => {
-    delete keysPressed[e.key.toLowerCase()];
-    clearAnimation();
-  });
-
-  function startTimer() {
-    const timerDisplay = document.getElementById('timer');
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      timerDisplay.textContent = `Time: ${timeLeft}`;
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        alert("⏰ Time's up! You didn't complete the level.");
-      }
-    }, 1000);
-  }
-
-  function movePlayer() {
-    let moved = false;
-
-    if (keysPressed['arrowup'] || keysPressed['w']) {
-      playerY -= step;
-      setAnimation('up');
-      moved = true;
-    } else if (keysPressed['arrowdown'] || keysPressed['s']) {
-      playerY += step;
-      setAnimation('down');
-      moved = true;
-    } else if (keysPressed['arrowleft'] || keysPressed['a']) {
-      playerX -= step;
-      setAnimation('left');
-      moved = true;
-    } else if (keysPressed['arrowright'] || keysPressed['d']) {
-      playerX += step;
-      setAnimation('right');
-      moved = true;
-    }
-
-    // Keep player within bounds
-    playerX = Math.max(0, Math.min(playerX, canvas.width - 48));
-    playerY = Math.max(0, Math.min(playerY, canvas.height - 48));
-
-    if (!moved) clearAnimation();
-
-    try {
-      const pixel = ctx.getImageData(playerX + 24, playerY + 24, 1, 1).data;
-      const [r, g, b] = pixel;
-      const isPath = r < 50 && g < 50 && b < 50;
-
-      if (isPath) {
-        player.style.transform = `translate(${playerX}px, ${playerY}px)`;
-      } else {
-        // Undo movement
-        if (keysPressed['arrowup'] || keysPressed['w']) playerY += step;
-        if (keysPressed['arrowdown'] || keysPressed['s']) playerY -= step;
-        if (keysPressed['arrowleft'] || keysPressed['a']) playerX += step;
-        if (keysPressed['arrowright'] || keysPressed['d']) playerX -= step;
-      }
-    } catch (err) {}
-
-    triggerJumpscare();
-    checkWin();
-  }
-
-  function setAnimation(direction) {
-    player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
-    if (direction === 'up') player.classList.add('walk-up');
-    if (direction === 'down') player.classList.add('walk-down');
-    if (direction === 'left') player.classList.add('walk-left');
-    if (direction === 'right') player.classList.add('walk-right');
-  }
-
-  function clearAnimation() {
-    player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
-  }
-
-  function checkWin() {
-    const finish = document.getElementById('finishLine').getBoundingClientRect();
-    const playerRect = player.getBoundingClientRect();
-
-    if (
-      playerRect.left < finish.right &&
-      playerRect.right > finish.left &&
-      playerRect.top < finish.bottom &&
-      playerRect.bottom > finish.top
-    ) {
+function startTimer() {
+  const timerDisplay = document.getElementById('timer');
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timerDisplay.textContent = `Time: ${timeLeft}`;
+    if (timeLeft <= 0) {
       clearInterval(timerInterval);
-      score = timeLeft * 10;
-      document.getElementById('score').textContent = `Score: ${score}`;
-      document.getElementById('finalScore').textContent = `Your final score: ${score}`;
-      document.getElementById('winPopup').style.display = 'block';
+      alert("⏰ Time's up! You didn't complete the level.");
     }
+  }, 1000);
+}
+
+function moveHandler(e) {
+  if (!timerStarted) {
+    startTimer();
+    timerStarted = true;
+  }
+  keysPressed[e.key.toLowerCase()] = true;
+}
+
+function keyUpHandler(e) {
+  delete keysPressed[e.key.toLowerCase()];
+  clearAnimation();
+}
+
+document.addEventListener('keydown', moveHandler);
+document.addEventListener('keyup', keyUpHandler);
+
+function movePlayer() {
+  let moved = false;
+  if (keysPressed['arrowup'] || keysPressed['w']) {
+    playerY -= step;
+    setAnimation('up');
+    moved = true;
+  } else if (keysPressed['arrowdown'] || keysPressed['s']) {
+    playerY += step;
+    setAnimation('down');
+    moved = true;
+  } else if (keysPressed['arrowleft'] || keysPressed['a']) {
+    playerX -= step;
+    setAnimation('left');
+    moved = true;
+  } else if (keysPressed['arrowright'] || keysPressed['d']) {
+    playerX += step;
+    setAnimation('right');
+    moved = true;
   }
 
-  let jumpscareCount = 0;
-  function triggerJumpscare() {
-    if (jumpscareCount >= 2) return;
+  playerX = Math.max(0, Math.min(playerX, canvas.width - 48));
+  playerY = Math.max(0, Math.min(playerY, canvas.height - 48));
+  if (!moved) clearAnimation();
 
-    if (Math.random() < 0.002) {
-      const img = jumpscares[Math.floor(Math.random() * jumpscares.length)];
-      jumpscare.style.backgroundImage = `url('${img}')`;
-      jumpscare.style.display = "block";
-      setTimeout(() => {
-        jumpscare.style.display = "none";
-      }, 700);
-      jumpscareCount++;
+  try {
+    const pixel = ctx.getImageData(playerX + 24, playerY + 24, 1, 1).data;
+    const [r, g, b] = pixel;
+    const isPath = r < 50 && g < 50 && b < 50;
+    if (isPath) {
+      player.style.transform = `translate(${playerX}px, ${playerY}px)`;
+    } else {
+      if (keysPressed['arrowup'] || keysPressed['w']) playerY += step;
+      if (keysPressed['arrowdown'] || keysPressed['s']) playerY -= step;
+      if (keysPressed['arrowleft'] || keysPressed['a']) playerX += step;
+      if (keysPressed['arrowright'] || keysPressed['d']) playerX -= step;
     }
-  }
+  } catch (err) {}
 
-  function gameLoop() {
-    movePlayer();
-    requestAnimationFrame(gameLoop);
-  }
+  triggerJumpscare();
+  checkWin();
+}
 
-  gameLoop();
+function setAnimation(direction) {
+  player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
+  if (direction === 'up') player.classList.add('walk-up');
+  if (direction === 'down') player.classList.add('walk-down');
+  if (direction === 'left') player.classList.add('walk-left');
+  if (direction === 'right') player.classList.add('walk-right');
+}
+
+function clearAnimation() {
+  player.classList.remove('walk-up', 'walk-down', 'walk-left', 'walk-right');
+}
+
+function checkWin() {
+  const finish = document.getElementById('finishLine').getBoundingClientRect();
+  const playerRect = player.getBoundingClientRect();
+  if (
+    playerRect.left < finish.right &&
+    playerRect.right > finish.left &&
+    playerRect.top < finish.bottom &&
+    playerRect.bottom > finish.top
+  ) {
+    clearInterval(timerInterval);
+    score = timeLeft * 10;
+    document.getElementById('score').textContent = `Score: ${score}`;
+    document.getElementById('finalScore').textContent = `Your final score: ${score}`;
+    document.getElementById('winPopup').style.display = 'block';
+    document.removeEventListener('keydown', moveHandler);
+    document.removeEventListener('keyup', keyUpHandler);
+  }
+}
+
+let jumpscareCount = 0;
+function triggerJumpscare() {
+  if (jumpscareCount >= 2) return;
+  if (Math.random() < 0.002) {
+    const img = jumpscares[Math.floor(Math.random() * jumpscares.length)];
+    jumpscare.style.backgroundImage = `url('${img}')`;
+    jumpscare.style.display = "block";
+    setTimeout(() => {
+      jumpscare.style.display = "none";
+    }, 700);
+    jumpscareCount++;
+  }
+}
+
+function gameLoop() {
+  movePlayer();
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
 </script>
 
 </body>
