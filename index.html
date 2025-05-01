@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EASY MODE</title>
+  <title>EZ MODE</title>
   <style>
     body {
       background: black;
@@ -75,6 +75,17 @@
       from {background-position: -60px -210px}
       to {background-position: -318px -210px}
     }
+
+    @keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.dot {
+  animation: pulse 1.2s infinite;
+}
+
 
     #timer {
       position: absolute;
